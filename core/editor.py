@@ -36,10 +36,37 @@ def get_note_suggestions(notes_dir: str = "notes/") -> List[str]:
         return []
 
 
+def create_note_if_not_exists(title: str) -> bool:
+    """
+    Create a new empty note with the given title if it doesn't exist.
+    
+    Args:
+        title (str): Title of the note to create
+    
+    Returns:
+        bool: True if note was created or already exists, False otherwise
+    """
+    try:
+        # Check if note with this title already exists
+        existing_notes = get_note_suggestions()
+        if title in existing_notes:
+            return True
+            
+        # Create empty note using storage function
+        from core.storage import save_note
+        filepath = save_note(content="", tags=[], title=title)
+        print(f"Created new note: {title}")
+        return True
+        
+    except Exception as e:
+        print(f"Error creating note {title}: {e}")
+        return False
+
+
 def process_file_for_autocomplete(filepath: str) -> bool:
     """
     Read the content of the file and insert HTML comments with note suggestions
-    when [[ is detected.
+    when [[ is detected. If a referenced note doesn't exist, prompt to create it.
     
     Args:
         filepath (str): Path to the file to process
@@ -55,7 +82,22 @@ def process_file_for_autocomplete(filepath: str) -> bool:
         # Get note suggestions
         suggestions = get_note_suggestions()
         
-        # Only proceed if we have suggestions
+        # Extract all [[note]] references
+        import re
+        pattern = r'\[\[(.*?)\]\]'
+        matches = re.findall(pattern, content)
+        
+        # Check for non-existent notes and prompt to create
+        for match in matches:
+            note_title = match.strip()
+            if note_title and note_title not in suggestions:
+                user_input = input(f"Note '{note_title}' does not exist. Create it? (y/N): ")
+                if user_input.lower() == 'y':
+                    create_note_if_not_exists(note_title)
+                    # Refresh suggestions after creating new note
+                    suggestions = get_note_suggestions()
+        
+        # Only proceed with autocomplete if we have suggestions
         if not suggestions:
             return True
             
@@ -65,7 +107,7 @@ def process_file_for_autocomplete(filepath: str) -> bool:
         
         # Find all [[ and add suggestions after each one
         # Only add suggestions if [[ is found and we have suggestions
-        if '[[' in content and suggestions:
+        if '[[' in content:
             # Split content by '[[', process each part, then rejoin
             parts = content.split('[[')
             updated_parts = [parts[0]]  # First part before any [[
