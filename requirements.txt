@@ -1,0 +1,5 @@
+click
+PyYAML
+rich
+textual
+# fzf должен быть установлен отдельно в системе
