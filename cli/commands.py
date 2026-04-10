@@ -1,10 +1,11 @@
+import glob
 import os
 import subprocess
 import sys
-import glob
+from typing import Optional
+
 import yaml
-from typing import Optional, List
-from core.search import find_notes_by_tag
+
 
 def interactive_search_fzf(tag: Optional[str] = None):
     """
@@ -94,13 +95,14 @@ def interactive_search_fzf(tag: Optional[str] = None):
     except Exception as e:
         print(f"Error running fzf: {e}", file=sys.stderr)
 
-def open_note(note_id: str, editor_cmd: str = "code"):
+def open_note(note_id: str, editor_cmd: str = "code", tag=None):
     """
     Open a note by ID for editing.
     
     Args:
         note_id: The ID of the note (filename without extension)
         editor_cmd: Command to open the editor (default: "code")
+        :param tag:
     """
     notes_dir = "notes"
     filepath = os.path.join(notes_dir, f"{note_id}.md")
