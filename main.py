@@ -7,7 +7,7 @@ from core.editor import process_file_for_autocomplete, remove_suggestions
 from core.search import find_notes_by_tag
 from core.stats import NoteStats
 from core.storage import save_note
-from core.tui import GraphApp, display_graph_rich
+from core.tui import GraphApp
 
 
 @click.group()
@@ -227,7 +227,7 @@ def graph():
         app.run()
     except ImportError:
         click.echo("Textual not available, falling back to rich...")
-        display_graph_rich()
+        click.echo("Rich visualization not available. Please install required packages.")
     except (ImportError, ModuleNotFoundError) as e:
         click.echo(f"Error displaying graph: {e}")
 
@@ -241,14 +241,14 @@ def stats():
     click.echo(f"- Total notes: {note_stats['total_notes']}")
     click.echo(f"- Tags used: {note_stats['unique_tags']}")
     
-    if stats['most_linked_note']:
-        note = stats['most_linked_note']
+    if note_stats['most_linked_note']:
+        note = note_stats['most_linked_note']
         click.echo(f"- Most linked note: {note['title']} ({note['link_count']} incoming)")
     else:
         click.echo("- Most linked note: None")
         
-    click.echo(f"- Average links per note: {stats['average_links']:.1f}")
-    click.echo(f"- Notes with tags: {stats['notes_with_tags']}/{stats['total_notes']}")
+    click.echo(f"- Average links per note: {note_stats['average_links']:.1f}")
+    click.echo(f"- Notes with tags: {note_stats['notes_with_tags']}/{note_stats['total_notes']}")
 
 if __name__ == '__main__':
     cli()
