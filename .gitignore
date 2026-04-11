@@ -2,3 +2,5 @@
 /.idea/
 /notes/
 /venv/
+__pycache__/
+*.pyc
