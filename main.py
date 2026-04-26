@@ -12,16 +12,20 @@ from core.tui import GraphApp
 
 @click.group()
 def cli():
+    """ZettelCore — A personal knowledge management system with Zettelkasten principles."""
     pass
 
 @cli.command()
 @click.argument('text', required=False)
 @click.option('--tags', help='Comma-separated tags')
-def create(text, tags):
+@click.option('--title', help='Explicit title for the note')
+def create(text, tags, title):
     """Create a new note with automatic filename and frontmatter. Opens in $EDITOR."""
     tag_list = tags.split(',') if tags else []
-    # If text is provided and is a simple title, use it as title
-    if text and not text.strip().endswith('.') and len(text.split()) <= 6:
+    # Use explicit title if provided, otherwise infer from text
+    if title:
+        note_path = save_note(text or '', tag_list, title=title)
+    elif text and not text.strip().endswith('.') and len(text.split()) <= 6:
         note_path = save_note('', tag_list, title=text.strip())
     else:
         note_path = save_note(text or 'New note', tag_list, title=None)
@@ -251,4 +255,11 @@ def stats():
     click.echo(f"- Notes with tags: {note_stats['notes_with_tags']}/{note_stats['total_notes']}")
 
 if __name__ == '__main__':
-    cli()
+    # If no arguments provided, show interactive menu
+    import sys
+    if len(sys.argv) == 1:
+        from cli.menu import Menu
+        menu = Menu()
+        menu.display_menu()
+    else:
+        cli()
