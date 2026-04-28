@@ -78,9 +78,9 @@ class Menu:
         try:
             # Create argument list for the create command
             args = []
-            # Add content as positional argument if it's not empty
+            # Add content as --content flag if it's not empty
             if content and content.strip():
-                args.append(content.strip())
+                args.extend(['--content', content.strip()])
             # Add tags option if tags exist
             if tags:
                 args.extend(['--tags', ','.join(tags)])
@@ -88,8 +88,11 @@ class Menu:
             if title:
                 args.extend(['--title', title])
             
-            # Invoke the create command with proper arguments
-            cli.main(args=args, prog_name='create')
+            # Create a context and invoke the create command
+            ctx = cli.make_context('cli', [])
+            create_cmd = cli.get_command(ctx, 'create')
+            create_ctx = create_cmd.make_context('create', args)
+            create_cmd.invoke(create_ctx)
                 
         except Exception as e:
             click.echo(f"Error creating note: {e}")
