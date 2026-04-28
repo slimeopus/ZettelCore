@@ -88,11 +88,9 @@ class Menu:
             if title:
                 args.extend(['--title', title])
             
-            # Create a context and invoke the create command
-            ctx = cli.make_context('cli', [])
-            create_cmd = cli.get_command(ctx, 'create')
-            create_ctx = create_cmd.make_context('create', args)
-            create_cmd.invoke(create_ctx)
+            # Invoke the create command directly with the arguments
+            ctx = cli.make_context('cli', ['create'] + args)
+            cli.invoke(ctx)
                 
         except Exception as e:
             click.echo(f"Error creating note: {e}")
