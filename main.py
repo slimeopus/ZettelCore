@@ -16,19 +16,21 @@ def cli():
     pass
 
 @cli.command()
-@click.argument('text', required=False)
+@click.option('--content', help='Content of the note')
 @click.option('--tags', help='Comma-separated tags')
 @click.option('--title', help='Explicit title for the note')
-def create(text, tags, title):
+def create(content, tags, title):
     """Create a new note with automatic filename and frontmatter. Opens in $EDITOR."""
     tag_list = tags.split(',') if tags else []
-    # Use explicit title if provided, otherwise infer from text
+    # Use explicit title if provided
     if title:
-        note_path = save_note(text or '', tag_list, title=title)
-    elif text and not text.strip().endswith('.') and len(text.split()) <= 6:
-        note_path = save_note('', tag_list, title=text.strip())
+        note_path = save_note(content or '', tag_list, title=title)
+    # If no title, use content as title if it's short and doesn't end with a period
+    elif content and not content.strip().endswith('.') and len(content.split()) <= 6:
+        note_path = save_note('', tag_list, title=content.strip())
+    # Otherwise use content as body, with default title
     else:
-        note_path = save_note(text or 'New note', tag_list, title=None)
+        note_path = save_note(content or 'New note', tag_list, title=None)
     click.echo(f"Note created: {note_path}")
     
     # Prepare file for autocomplete
